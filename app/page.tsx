@@ -1,7 +1,26 @@
-export default function Home() {
+import { Suspense } from "react";
+import { getAllPokemon } from "@/lib/pokemon-api";
+import PokemonList from "@/components/pokemon-list";
+
+export default async function Home() {
+  const pokemon = await getAllPokemon();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      Hello World
-    </div>
+    <main className="min-h-screen bg-gray-50">
+      <header className="bg-red-600 text-white py-6 px-4 shadow-md">
+        <div className="mx-auto max-w-7xl">
+          <h1 className="text-3xl font-bold tracking-tight">Pokédex</h1>
+          <p className="mt-1 text-red-100 text-sm">
+            {pokemon.length} Pokémon from all generations
+          </p>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <Suspense fallback={<div className="text-center py-20 text-gray-400">Loading...</div>}>
+          <PokemonList pokemon={pokemon} />
+        </Suspense>
+      </div>
+    </main>
   );
 }
