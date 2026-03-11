@@ -1,7 +1,7 @@
 "use client";
 
-import { REAL_TYPES } from "@/lib/types";
-import { formatName } from "@/lib/pokemon-api";
+import { REAL_TYPES } from "@/lib/consts";
+import { formatName } from "@/lib/format-texts";
 import SearchInput from "./search-input";
 
 const GENERATIONS = Array.from({ length: 9 }, (_, i) => i + 1);

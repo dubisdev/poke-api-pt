@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
 import {
-  formatName,
-  getSprite,
-  getOfficialArt,
-  generationToNumber,
   flattenEvolutionChain,
-} from "../../../lib/pokemon-api";
-import type { RawEvolutionLinkOutput } from "../../../lib/schemas";
+  generationToNumber,
+  formatName,
+  getOfficialArtUrl,
+  getSpriteUrl,
+} from "@/lib/format-texts";
+import type { RawEvolutionLinkOutput } from "../schemas";
 
 describe("formatName", () => {
   it("capitalizes a single-word name", () => {
@@ -24,7 +24,7 @@ describe("formatName", () => {
 
 describe("getSprite", () => {
   it("returns the correct sprite URL", () => {
-    expect(getSprite(1)).toBe(
+    expect(getSpriteUrl(1)).toBe(
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
     );
   });
@@ -32,7 +32,7 @@ describe("getSprite", () => {
 
 describe("getOfficialArt", () => {
   it("returns the correct official-artwork URL", () => {
-    expect(getOfficialArt(1)).toBe(
+    expect(getOfficialArtUrl(1)).toBe(
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png",
     );
   });

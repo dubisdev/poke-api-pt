@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parsePokemonFilters } from "./parse-pokemon-filters";
+import { parsePokemonFilters } from "../parse-pokemon-filters";
 
 describe("parsePokemonFilters", () => {
   it("returns empty defaults for an empty string", () => {

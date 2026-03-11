@@ -1,5 +1,5 @@
-import { TYPE_COLORS } from "@/lib/types";
-import { formatName } from "@/lib/pokemon-api";
+import { TYPE_COLORS } from "@/lib/consts";
+import { formatName } from "@/lib/format-texts";
 
 interface TypeBadgeProps {
   type: string;

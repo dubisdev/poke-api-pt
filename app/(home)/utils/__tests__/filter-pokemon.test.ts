@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { filterPokemon } from "./filter-pokemon";
-import type { PokemonListItem } from "../../../lib/types";
+import { filterPokemon } from "../filter-pokemon";
+import type { PokemonListItem } from "../../../../lib/types";
 
 const pokemon: PokemonListItem[] = [
   {

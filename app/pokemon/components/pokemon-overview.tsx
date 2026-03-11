@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { PokemonDetail } from "@/lib/types";
-import { formatName } from "@/lib/pokemon-api";
+import { formatName } from "@/lib/format-texts";
 import TypeBadge from "../../components/type-badge";
 
 interface PokemonOverviewProps {

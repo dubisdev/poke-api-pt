@@ -1,7 +1,12 @@
 import type { PokemonDetail, PokemonListItem } from "./types";
-import { REAL_TYPES } from "./types";
+import { REAL_TYPES } from "./consts";
 import {
-  type RawEvolutionLinkOutput,
+  flattenEvolutionChain,
+  generationToNumber,
+  getOfficialArtUrl,
+  getSpriteUrl,
+} from "./format-texts";
+import {
   RawPokemonSchema,
   RawGenerationSchema,
   RawTypeSchema,
@@ -19,41 +24,6 @@ function extractId(url: string): number {
   return parseInt(parts[parts.length - 2]);
 }
 
-export function generationToNumber(name: string): number {
-  const map: Record<string, number> = {
-    "generation-i": 1,
-    "generation-ii": 2,
-    "generation-iii": 3,
-    "generation-iv": 4,
-    "generation-v": 5,
-    "generation-vi": 6,
-    "generation-vii": 7,
-    "generation-viii": 8,
-    "generation-ix": 9,
-  };
-
-  return map[name] ?? 0;
-}
-
-export function flattenEvolutionChain(link: RawEvolutionLinkOutput): string[] {
-  return [link.species.name, ...link.evolves_to.flatMap(flattenEvolutionChain)];
-}
-
-export function getSprite(id: number): string {
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-}
-
-export function getOfficialArt(id: number): string {
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
-}
-
-export function formatName(name: string): string {
-  return name
-    .split("-")
-    .map((word) => word[0].toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
 // ── List page data ─────────────────────────────────────────────────────────────
 
 export async function getAllPokemon(): Promise<PokemonListItem[]> {
@@ -67,7 +37,7 @@ export async function getAllPokemon(): Promise<PokemonListItem[]> {
   return pokemonList.map(({ id, name }) => ({
     id,
     name,
-    sprite: getSprite(id),
+    sprite: getSpriteUrl(id),
     types: typesMap.get(name) ?? [],
     generation: generationMap.get(name) ?? 0,
     evolutionChainId: evolutionMap.get(name) ?? 0,
@@ -107,6 +77,7 @@ async function buildTypesMap(): Promise<Map<string, string[]>> {
       map.set(pokemon.name, [...current, typeData.name]);
     }
   }
+
   return map;
 }
 
@@ -151,7 +122,7 @@ export async function getPokemonDetail(id: number): Promise<PokemonDetail> {
   const evolutionChain = evolutionPokemons.map((p) => ({
     id: p.id,
     name: p.name,
-    sprite: getOfficialArt(p.id),
+    sprite: getOfficialArtUrl(p.id),
   }));
 
   const stats = pokemon.stats.map((s) => ({
@@ -165,7 +136,7 @@ export async function getPokemonDetail(id: number): Promise<PokemonDetail> {
     types: pokemon.types.map((t) => t.type.name),
     generation: generationToNumber(species.generation.name),
     stats,
-    officialArt: getOfficialArt(pokemon.id),
+    officialArt: getOfficialArtUrl(pokemon.id),
     evolutionChain,
   };
 }

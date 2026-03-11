@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import PokemonGrid from "./pokemon-grid";
+import PokemonGrid from "../pokemon-grid";
 import type { PokemonListItem } from "@/lib/types";
 
 vi.mock("./pokemon-card", () => ({

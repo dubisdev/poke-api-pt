@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { EvolutionStage } from "@/lib/types";
-import { formatName } from "@/lib/pokemon-api";
+import { formatName } from "@/lib/format-texts";
 
 interface EvolutionChainProps {
   evolutionChain: EvolutionStage[];

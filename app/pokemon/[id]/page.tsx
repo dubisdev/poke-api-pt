@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPokemonDetail, formatName } from "@/lib/pokemon-api";
+import { getPokemonDetail } from "@/lib/pokemon-api";
+import { formatName } from "@/lib/format-texts";
 import PokemonOverview from "@/app/pokemon/components/pokemon-overview";
 import StatsSection from "@/app/pokemon/components/stats-section";
 import EvolutionChain from "@/app/pokemon/components/evolution-chain";

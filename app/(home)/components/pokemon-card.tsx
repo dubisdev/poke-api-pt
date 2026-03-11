@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { PokemonListItem } from "@/lib/types";
-import { formatName } from "@/lib/pokemon-api";
+import { formatName } from "@/lib/format-texts";
 import TypeBadge from "../../components/type-badge";
 
 interface PokemonCardProps {
