@@ -1,4 +1,3 @@
-import * as v from "valibot";
 import type { PokemonDetail, PokemonListItem } from "./types";
 import { REAL_TYPES } from "./types";
 import {
@@ -11,41 +10,16 @@ import {
     PokemonListResponseSchema,
     EvolutionChainListResponseSchema,
 } from "./schemas";
+import { batchRequests, getJson } from "./fetch";
 
 const BASE_URL = "https://pokeapi.co/api/v2";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-async function getJson<TSchema extends v.GenericSchema>(
-    url: string,
-    schema: TSchema
-): Promise<v.InferOutput<TSchema>> {
-    const res = await fetch(url, { cache: "force-cache" });
-    if (!res.ok) throw new Error(`Failed to fetch: ${url} (${res.status})`);
-    const data = await res.json();
-    return v.parse(schema, data);
-}
-
-async function batchRequests<TSchema extends v.GenericSchema>(
-    urls: string[],
-    schema: TSchema,
-    batchSize = 500
-): Promise<v.InferOutput<TSchema>[]> {
-    const results: v.InferOutput<TSchema>[] = [];
-    for (let i = 0; i < urls.length; i += batchSize) {
-        const batch = urls.slice(i, i + batchSize);
-        const batchResults = await Promise.all(batch.map((url) => getJson(url, schema)));
-        results.push(...batchResults);
-    }
-    return results;
-}
 
 function extractId(url: string): number {
     const parts = url.split("/");
     return parseInt(parts[parts.length - 2]);
 }
 
-function generationToNumber(name: string): number {
+export function generationToNumber(name: string): number {
     const map: Record<string, number> = {
         "generation-i": 1,
         "generation-ii": 2,
@@ -57,10 +31,11 @@ function generationToNumber(name: string): number {
         "generation-viii": 8,
         "generation-ix": 9,
     };
+
     return map[name] ?? 0;
 }
 
-function flattenEvolutionChain(link: RawEvolutionLinkOutput): string[] {
+export function flattenEvolutionChain(link: RawEvolutionLinkOutput): string[] {
     return [
         link.species.name,
         ...link.evolves_to.flatMap(flattenEvolutionChain),
@@ -85,7 +60,6 @@ export function formatName(name: string): string {
 // ── List page data ─────────────────────────────────────────────────────────────
 
 export async function getAllPokemon(): Promise<PokemonListItem[]> {
-    // parallel: pokemon list, all generations, all types, all evolution chains
     const [pokemonList, generationMap, typesMap, evolutionMap] = await Promise.all([
         fetchPokemonList(),
         buildGenerationMap(),
