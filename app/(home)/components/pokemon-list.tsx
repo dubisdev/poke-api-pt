@@ -1,7 +1,7 @@
 "use client";
 
 import type { PokemonListItem } from "@/lib/types";
-import { usePokemonFilters } from "@/hooks/use-pokemon-filters";
+import { usePokemonFilters } from "../hooks/use-pokemon-filters";
 import SearchAndFilters from "./search-and-filters";
 import PokemonGrid from "./pokemon-grid";
 
