@@ -51,7 +51,7 @@ async function getJson<T>(url: string): Promise<T> {
     return res.json() as Promise<T>;
 }
 
-async function batchRequests<T>(urls: string[], batchSize = 80): Promise<T[]> {
+async function batchRequests<T>(urls: string[], batchSize = 500): Promise<T[]> {
     const results: T[] = [];
     for (let i = 0; i < urls.length; i += batchSize) {
         const batch = urls.slice(i, i + batchSize);
