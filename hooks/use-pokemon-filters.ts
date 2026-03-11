@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { PokemonListItem } from "@/lib/types";
+import { filterPokemon } from "@/lib/filter-pokemon";
 
 export function usePokemonFilters(pokemon: PokemonListItem[]) {
     const router = useRouter();
@@ -25,32 +26,10 @@ export function usePokemonFilters(pokemon: PokemonListItem[]) {
         router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     }
 
-    const filtered = useMemo(() => {
-        let result = pokemon;
-
-        if (search) {
-            const query = search.toLowerCase();
-            const chainIds = new Set(
-                result
-                    .filter((p) => p.name.includes(query))
-                    .map((p) => p.evolutionChainId)
-                    .filter(Boolean)
-            );
-            result = result.filter(
-                (p) => p.name.includes(query) || chainIds.has(p.evolutionChainId)
-            );
-        }
-
-        if (selectedType) {
-            result = result.filter((p) => p.types.includes(selectedType));
-        }
-
-        if (selectedGeneration) {
-            result = result.filter((p) => p.generation === selectedGeneration);
-        }
-
-        return result;
-    }, [pokemon, search, selectedType, selectedGeneration]);
+    const filtered = useMemo(
+        () => filterPokemon(pokemon, { search, type: selectedType, generation: selectedGeneration }),
+        [pokemon, search, selectedType, selectedGeneration]
+    );
 
     return {
         search,

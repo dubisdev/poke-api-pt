@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { getAllPokemon } from "@/lib/pokemon-api";
 import PokemonList from "@/components/pokemon-list";
 
@@ -17,9 +16,7 @@ export default async function Home() {
       </header>
 
       <div className="mx-auto max-w-7xl px-4 py-8">
-        <Suspense fallback={<div className="text-center py-20 text-gray-400">Loading...</div>}>
-          <PokemonList pokemon={pokemon} />
-        </Suspense>
+        <PokemonList pokemon={pokemon} />
       </div>
     </main>
   );
