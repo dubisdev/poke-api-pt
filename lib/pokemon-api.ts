@@ -1,61 +1,40 @@
-import type { PokemonDetail, PokemonListItem, PokemonStat, EvolutionStage } from "./types";
+import * as v from "valibot";
+import type { PokemonDetail, PokemonListItem } from "./types";
 import { REAL_TYPES } from "./types";
+import {
+    type RawEvolutionLinkOutput,
+    RawPokemonSchema,
+    RawGenerationSchema,
+    RawTypeSchema,
+    RawEvolutionChainSchema,
+    RawSpeciesSchema,
+    PokemonListResponseSchema,
+    EvolutionChainListResponseSchema,
+} from "./schemas";
 
 const BASE_URL = "https://pokeapi.co/api/v2";
 
-// ── PokeAPI raw response shapes (minimal) ─────────────────────────────────────
-
-interface RawPokemon {
-    id: number;
-    name: string;
-    types: { slot: number; type: { name: string } }[];
-    sprites: {
-        front_default: string;
-        other: { "official-artwork": { front_default: string } };
-    };
-    species: { url: string };
-    stats: { base_stat: number; stat: { name: string } }[];
-}
-
-interface RawGeneration {
-    id: number;
-    name: string;
-    pokemon_species: { name: string }[];
-}
-
-interface RawType {
-    name: string;
-    pokemon: { pokemon: { name: string } }[];
-}
-
-interface RawEvolutionLink {
-    species: { name: string; url: string };
-    evolves_to: RawEvolutionLink[];
-}
-
-interface RawEvolutionChain {
-    id: number;
-    chain: RawEvolutionLink;
-}
-
-interface RawSpecies {
-    generation: { name: string };
-    evolution_chain: { url: string };
-}
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-async function getJson<T>(url: string): Promise<T> {
+async function getJson<TSchema extends v.GenericSchema>(
+    url: string,
+    schema: TSchema
+): Promise<v.InferOutput<TSchema>> {
     const res = await fetch(url, { cache: "force-cache" });
     if (!res.ok) throw new Error(`Failed to fetch: ${url} (${res.status})`);
-    return res.json() as Promise<T>;
+    const data = await res.json();
+    return v.parse(schema, data);
 }
 
-async function batchRequests<T>(urls: string[], batchSize = 500): Promise<T[]> {
-    const results: T[] = [];
+async function batchRequests<TSchema extends v.GenericSchema>(
+    urls: string[],
+    schema: TSchema,
+    batchSize = 500
+): Promise<v.InferOutput<TSchema>[]> {
+    const results: v.InferOutput<TSchema>[] = [];
     for (let i = 0; i < urls.length; i += batchSize) {
         const batch = urls.slice(i, i + batchSize);
-        const batchResults = await Promise.all(batch.map((url) => getJson<T>(url)));
+        const batchResults = await Promise.all(batch.map((url) => getJson(url, schema)));
         results.push(...batchResults);
     }
     return results;
@@ -81,7 +60,7 @@ function generationToNumber(name: string): number {
     return map[name] ?? 0;
 }
 
-function flattenEvolutionChain(link: RawEvolutionLink): string[] {
+function flattenEvolutionChain(link: RawEvolutionLinkOutput): string[] {
     return [
         link.species.name,
         ...link.evolves_to.flatMap(flattenEvolutionChain),
@@ -125,8 +104,9 @@ export async function getAllPokemon(): Promise<PokemonListItem[]> {
 }
 
 async function fetchPokemonList(): Promise<{ id: number; name: string }[]> {
-    const data = await getJson<{ results: { name: string; url: string }[] }>(
-        `${BASE_URL}/pokemon?limit=1025&offset=0`
+    const data = await getJson(
+        `${BASE_URL}/pokemon?limit=1025&offset=0`,
+        PokemonListResponseSchema
     );
     return data.results.map(({ name, url }) => ({ name, id: extractId(url) }));
 }
@@ -135,7 +115,7 @@ async function buildGenerationMap(): Promise<Map<string, number>> {
     const generationNumbers = Array.from({ length: 9 }, (_, i) => i + 1);
     const generations = await Promise.all(
         generationNumbers.map((n) =>
-            getJson<RawGeneration>(`${BASE_URL}/generation/${n}`)
+            getJson(`${BASE_URL}/generation/${n}`, RawGenerationSchema)
         )
     );
 
@@ -151,7 +131,7 @@ async function buildGenerationMap(): Promise<Map<string, number>> {
 
 async function buildTypesMap(): Promise<Map<string, string[]>> {
     const types = await Promise.all(
-        REAL_TYPES.map((type) => getJson<RawType>(`${BASE_URL}/type/${type}`))
+        REAL_TYPES.map((type) => getJson(`${BASE_URL}/type/${type}`, RawTypeSchema))
     );
 
     const map = new Map<string, string[]>();
@@ -165,12 +145,14 @@ async function buildTypesMap(): Promise<Map<string, string[]>> {
 }
 
 async function buildEvolutionMap(): Promise<Map<string, number>> {
-    const list = await getJson<{ results: { url: string }[] }>(
-        `${BASE_URL}/evolution-chain?limit=600`
+    const list = await getJson(
+        `${BASE_URL}/evolution-chain?limit=600`,
+        EvolutionChainListResponseSchema
     );
 
-    const chains = await batchRequests<RawEvolutionChain>(
-        list.results.map((r) => r.url)
+    const chains = await batchRequests(
+        list.results.map((r) => r.url),
+        RawEvolutionChainSchema
     );
 
     const map = new Map<string, number>();
@@ -186,25 +168,27 @@ async function buildEvolutionMap(): Promise<Map<string, number>> {
 // ── Detail page data ──────────────────────────────────────────────────────────
 
 export async function getPokemonDetail(id: number): Promise<PokemonDetail> {
-    const pokemon = await getJson<RawPokemon>(`${BASE_URL}/pokemon/${id}`);
-    const species = await getJson<RawSpecies>(pokemon.species.url);
-    const chainData = await getJson<RawEvolutionChain>(
-        species.evolution_chain.url
+    const pokemon = await getJson(`${BASE_URL}/pokemon/${id}`, RawPokemonSchema);
+    const species = await getJson(pokemon.species.url, RawSpeciesSchema);
+    const chainData = await getJson(
+        species.evolution_chain.url,
+        RawEvolutionChainSchema
     );
 
     const evolutionNames = flattenEvolutionChain(chainData.chain);
 
-    const evolutionPokemons = await batchRequests<RawPokemon>(
-        evolutionNames.map((name) => `${BASE_URL}/pokemon/${name}`)
+    const evolutionPokemons = await batchRequests(
+        evolutionNames.map((name) => `${BASE_URL}/pokemon/${name}`),
+        RawPokemonSchema
     );
 
-    const evolutionChain: EvolutionStage[] = evolutionPokemons.map((p) => ({
+    const evolutionChain = evolutionPokemons.map((p) => ({
         id: p.id,
         name: p.name,
         sprite: getOfficialArt(p.id),
     }));
 
-    const stats: PokemonStat[] = pokemon.stats.map((s) => ({
+    const stats = pokemon.stats.map((s) => ({
         name: s.stat.name,
         value: s.base_stat,
     }));

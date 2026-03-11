@@ -1,32 +1,9 @@
-export interface PokemonListItem {
-    id: number;
-    name: string;
-    types: string[];
-    generation: number;
-    evolutionChainId: number;
-    sprite: string;
-}
-
-export interface PokemonStat {
-    name: string;
-    value: number;
-}
-
-export interface EvolutionStage {
-    id: number;
-    name: string;
-    sprite: string;
-}
-
-export interface PokemonDetail {
-    id: number;
-    name: string;
-    types: string[];
-    generation: number;
-    stats: PokemonStat[];
-    officialArt: string;
-    evolutionChain: EvolutionStage[];
-}
+export type {
+    PokemonListItem,
+    PokemonStat,
+    EvolutionStage,
+    PokemonDetail,
+} from "./schemas";
 
 export const TYPE_COLORS: Record<string, string> = {
     normal: "bg-gray-400 text-white",
