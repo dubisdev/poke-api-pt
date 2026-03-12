@@ -17,7 +17,19 @@ export async function generateMetadata({ params }: Props) {
   return { title: `Pokédex - #${id}` };
 }
 
-async function PokemonContent({ pokemonId, from }: { pokemonId: number; from?: string }) {
+async function PokemonContent({ 
+  params, 
+  searchParams 
+}: { 
+  params: Promise<{ id: string }>; 
+  searchParams: Promise<{ from?: string }> 
+}) {
+  const { id } = await params;
+  const { from } = await searchParams;
+
+  const pokemonId = parseInt(id);
+  if (isNaN(pokemonId) || pokemonId < 1 || pokemonId > 1025) notFound();
+
   const pokemon = await getPokemonDetail(pokemonId);
   const backHref = from ? `/?${from}` : "/";
 
@@ -72,17 +84,11 @@ function PokemonSkeleton() {
   );
 }
 
-export default async function PokemonPage({ params, searchParams }: Props) {
-  const { id } = await params;
-  const { from } = await searchParams;
-
-  const pokemonId = parseInt(id);
-  if (isNaN(pokemonId) || pokemonId < 1 || pokemonId > 1025) notFound();
-
+export default function PokemonPage({ params, searchParams }: Props) {
   return (
     <main className="min-h-screen bg-gray-50">
       <Suspense fallback={<PokemonSkeleton />}>
-        <PokemonContent pokemonId={pokemonId} from={from} />
+        <PokemonContent params={params} searchParams={searchParams} />
       </Suspense>
     </main>
   );
