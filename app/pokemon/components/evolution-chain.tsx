@@ -11,7 +11,7 @@ interface EvolutionChainProps {
 
 export default function EvolutionChain({ evolutionChain, currentId, from }: EvolutionChainProps) {
   return (
-    <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+    <section data-testid="evolution-chain" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
       <h3 className="text-lg font-bold text-gray-800 mb-4">Evolution Chain</h3>
       <div className="flex flex-wrap gap-4 justify-center">
         {evolutionChain.map((stage, index) => {
@@ -22,6 +22,7 @@ export default function EvolutionChain({ evolutionChain, currentId, from }: Evol
               {index > 0 && <span className="text-gray-400 text-xl">→</span>}
               <Link href={href}>
                 <div
+                  data-current={isCurrent}
                   className={`flex flex-col items-center gap-1 rounded-xl p-3 border-2 transition-all ${
                     isCurrent
                       ? "border-red-500 bg-red-50"

@@ -14,8 +14,8 @@ export default function PokemonCard({ pokemon, searchParams }: PokemonCardProps)
 
   return (
     <Link href={detailUrl}>
-      <article className="group flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md hover:border-gray-300 cursor-pointer">
-        <span className="text-xs text-gray-400 font-mono self-end">
+      <article data-testid="pokemon-card" className="group flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md hover:border-gray-300 cursor-pointer">
+        <span data-testid="pokemon-id" className="text-xs text-gray-400 font-mono self-end">
           #{String(pokemon.id).padStart(4, "0")}
         </span>
         <div className="relative h-24 w-24">

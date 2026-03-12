@@ -11,7 +11,7 @@ export default function TypeBadge({ type, size = "sm" }: TypeBadgeProps) {
   const sizeClass = size === "md" ? "px-3 py-1 text-sm" : "px-2 py-0.5 text-xs";
 
   return (
-    <span className={`${colorClass} ${sizeClass} rounded-full font-semibold capitalize`}>
+    <span data-testid="type-badge" className={`${colorClass} ${sizeClass} rounded-full font-semibold capitalize`}>
       {formatName(type)}
     </span>
   );

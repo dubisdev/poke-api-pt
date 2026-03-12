@@ -2,6 +2,8 @@ import { getAllPokemon } from "@/lib/pokemon-api";
 import PokemonList from "@/app/(home)/components/pokemon-list";
 
 export default async function Home() {
+  'use cache'
+  
   const pokemon = await getAllPokemon();
 
   return (
